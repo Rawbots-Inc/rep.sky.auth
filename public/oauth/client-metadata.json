@@ -1,0 +1,19 @@
+{
+    "client_id": "https://dev.rep.run/auth/atproto/client-metadata.json",
+    "application_type": "web",
+    "client_name": "Example Browser App",
+    "client_uri": "https://dev.rep.run",
+    "dpop_bound_access_tokens": true,
+    "grant_types": [
+        "authorization_code",
+        "refresh_token"
+    ],
+    "redirect_uris": [
+        "https://dev.rep.run/oauth/callback"
+    ],
+    "response_types": [
+        "code"
+    ],
+    "scope": "atproto transition:generic",
+    "token_endpoint_auth_method": "none"
+}
