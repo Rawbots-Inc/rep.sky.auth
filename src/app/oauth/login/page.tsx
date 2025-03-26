@@ -1,33 +1,30 @@
 "use client";
 
 import { BrowserOAuthClient } from "@atproto/oauth-client-browser";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 
 const ENV = process.env.NODE_ENV;
 
 const HANDLE_RESOLVER_URL = "https://bsky.social";
 
+const client = new BrowserOAuthClient({
+  clientMetadata: {
+    client_id: "https://rep-sky-auth.vercel.app/client-metadata.json",
+    application_type: "web",
+    client_name: "Repsky Auth",
+    client_uri: "https://rep-sky-auth.vercel.app",
+    dpop_bound_access_tokens: true,
+    grant_types: ["authorization_code", "refresh_token"],
+    redirect_uris: ["https://rep-sky-auth.vercel.app/oauth/callback"],
+    response_types: ["code"],
+    scope: "atproto transition:generic",
+    token_endpoint_auth_method: "none",
+  },
+  handleResolver: HANDLE_RESOLVER_URL,
+  allowHttp: ENV === "development" || ENV === "test",
+});
+
 export default function AtProtoAuth() {
-  const client = useMemo(
-    () =>
-      new BrowserOAuthClient({
-        clientMetadata: {
-          client_id: window.location.origin + "/client-metadata.json",
-          application_type: "web",
-          client_name: "Repsky Auth",
-          client_uri: "https://rep-sky-auth.vercel.app",
-          dpop_bound_access_tokens: true,
-          grant_types: ["authorization_code", "refresh_token"],
-          redirect_uris: ["https://rep-sky-auth.vercel.app/oauth/callback"],
-          response_types: ["code"],
-          scope: "atproto transition:generic",
-          token_endpoint_auth_method: "none",
-        },
-        handleResolver: HANDLE_RESOLVER_URL,
-        allowHttp: ENV === "development" || ENV === "test",
-      }),
-    []
-  );
   useEffect(() => {
     // Get the parent frame's origin from the offscreen iframe
     const PARENT_FRAME = document.location.ancestorOrigins[0];
