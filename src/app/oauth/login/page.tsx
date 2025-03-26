@@ -1,7 +1,7 @@
 "use client";
 
 import { useOAuth } from "@/components/auth/oauth/use-oauth";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 const ENV = process.env.NODE_ENV;
 
@@ -11,20 +11,26 @@ const HANDLE_RESOLVER_URL = "https://bsky.social";
 
 const SIGN_UP_URL = "https://bsky.social";
 
-const clientId = `http://localhost?${new URLSearchParams({
-  scope: "atproto transition:generic",
-  redirect_uri: Object.assign(new URL(window.location.origin), {
-    pathname: "/oauth/callback",
-    search: new URLSearchParams({
-      env: ENV,
-      handle_resolver: HANDLE_RESOLVER_URL,
-      sign_up_url: SIGN_UP_URL,
-      // ...(PLC_DIRECTORY_URL && { plc_directory_url: PLC_DIRECTORY_URL })
-    }).toString(),
-  }).href,
-})}`;
-
 export default function AtProtoAuth() {
+  const clientId = useMemo(
+    () =>
+      typeof window === "undefined"
+        ? ""
+        : `http://localhost?${new URLSearchParams({
+            scope: "atproto transition:generic",
+            redirect_uri: Object.assign(new URL(window.location.origin), {
+              pathname: "/oauth/callback",
+              search: new URLSearchParams({
+                env: ENV,
+                handle_resolver: HANDLE_RESOLVER_URL,
+                sign_up_url: SIGN_UP_URL,
+                // ...(PLC_DIRECTORY_URL && { plc_directory_url: PLC_DIRECTORY_URL })
+              }).toString(),
+            }).href,
+          })}`,
+    []
+  );
+
   const { signIn } = useOAuth({
     clientId,
     plcDirectoryUrl: PLC_DIRECTORY_URL,
