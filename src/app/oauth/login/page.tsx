@@ -13,8 +13,7 @@ const SIGN_UP_URL = "https://bsky.social";
 
 const clientId = `http://localhost?${new URLSearchParams({
   scope: "atproto transition:generic",
-  redirect_uri: Object.assign(new URL("http://127.0.0.1:3000"), {
-    hostname: "127.0.0.1",
+  redirect_uri: Object.assign(new URL(window.location.origin), {
     pathname: "/oauth/callback",
     search: new URLSearchParams({
       env: ENV,
