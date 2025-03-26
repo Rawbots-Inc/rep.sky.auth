@@ -1,37 +1,33 @@
 "use client";
 
-import { useOAuth } from "@/components/auth/oauth/use-oauth";
-import { useEffect } from "react";
+import { BrowserOAuthClient } from "@atproto/oauth-client-browser";
+import { useEffect, useMemo } from "react";
 
 const ENV = process.env.NODE_ENV;
 
-const PLC_DIRECTORY_URL: string | undefined = undefined;
-
 const HANDLE_RESOLVER_URL = "https://bsky.social";
 
-const SIGN_UP_URL = "https://bsky.social";
-
-const clientId = `http://localhost?${new URLSearchParams({
-  scope: "atproto transition:generic",
-  redirect_uri: Object.assign(new URL("https://rep-sky-auth.vercel.app"), {
-    pathname: "/oauth/callback",
-    search: new URLSearchParams({
-      env: ENV,
-      handle_resolver: HANDLE_RESOLVER_URL,
-      sign_up_url: SIGN_UP_URL,
-      // ...(PLC_DIRECTORY_URL && { plc_directory_url: PLC_DIRECTORY_URL })
-    }).toString(),
-  }).href,
-})}`;
-
 export default function AtProtoAuth() {
-  const { signIn } = useOAuth({
-    clientId,
-    plcDirectoryUrl: PLC_DIRECTORY_URL,
-    handleResolver: HANDLE_RESOLVER_URL,
-    allowHttp: ENV === "development" || ENV === "test",
-  });
-
+  const client = useMemo(
+    () =>
+      new BrowserOAuthClient({
+        clientMetadata: {
+          client_id: window.location.origin + "/client-metadata.json",
+          application_type: "web",
+          client_name: "Repsky Auth",
+          client_uri: "https://rep-sky-auth.vercel.app",
+          dpop_bound_access_tokens: true,
+          grant_types: ["authorization_code", "refresh_token"],
+          redirect_uris: ["https://rep-sky-auth.vercel.app/oauth/callback"],
+          response_types: ["code"],
+          scope: "atproto transition:generic",
+          token_endpoint_auth_method: "none",
+        },
+        handleResolver: HANDLE_RESOLVER_URL,
+        allowHttp: ENV === "development" || ENV === "test",
+      }),
+    []
+  );
   useEffect(() => {
     // Get the parent frame's origin from the offscreen iframe
     const PARENT_FRAME = document.location.ancestorOrigins[0];
@@ -46,7 +42,7 @@ export default function AtProtoAuth() {
       const { action, data } = event.data;
 
       if (action === "social-login") {
-        signIn(data);
+        client.signInPopup(data);
       }
     });
 
@@ -69,12 +65,12 @@ export default function AtProtoAuth() {
       globalThis.removeEventListener("message", () => {});
       channel.close();
     };
-  }, [signIn]);
+  }, [client]);
 
   return (
     <button
       onClick={() => {
-        signIn("lebaothinh.bsky.social");
+        client.signInPopup("lebaothinh.bsky.social");
       }}
     >
       SignIn
